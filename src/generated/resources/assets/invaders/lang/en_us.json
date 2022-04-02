@@ -1,3 +1,4 @@
 {
-  "invaders.commands.error.spawn.error": ""
+  "invaders.commands.error.spawn.error": "\u00A7cIf you see this message please open a bug report!",
+  "invaders.commands.error.spawn.exceedMax": "\u00A7cMax Re-Roll Count Reached!"
 }

@@ -14,7 +14,7 @@ import wintersteve25.invaders.Invaders;
 import wintersteve25.invaders.capabilities.ModPlayerData;
 import wintersteve25.invaders.capabilities.base.CapabilityProvider;
 import wintersteve25.invaders.commands.ReRollSpawnCommand;
-import wintersteve25.invaders.init.ModCapabilities;
+import wintersteve25.invaders.init.InvadersCapabilities;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,8 +27,8 @@ public class ServerForgeEvents {
     public static void playerAttachEvent(AttachCapabilitiesEvent<Entity> event) {
         Entity entity = event.getObject();
         if (entity instanceof PlayerEntity) {
-            if (!entity.getCapability(ModCapabilities.PLAYER_DATA).isPresent()) {
-                CapabilityProvider<ModPlayerData> provider = new CapabilityProvider<>(new ModPlayerData(), ModCapabilities.PLAYER_DATA);
+            if (!entity.getCapability(InvadersCapabilities.PLAYER_DATA).isPresent()) {
+                CapabilityProvider<ModPlayerData> provider = new CapabilityProvider<>(new ModPlayerData(), InvadersCapabilities.PLAYER_DATA);
                 event.addCapability(new ResourceLocation(Invaders.MODID, "player_data"), provider);
                 event.addListener(provider::invalidate);
             }
@@ -36,17 +36,16 @@ public class ServerForgeEvents {
     }
 
     public static void playerSpawn(EntityJoinWorldEvent event) {
-
         Entity entity = event.getEntity();
         if (!(entity instanceof ServerPlayerEntity)) return;
-        if (entity.getEntityWorld().isRemote()) return;
+        if (entity.getCommandSenderWorld().isClientSide()) return;
 
         ServerPlayerEntity player = (ServerPlayerEntity) entity;
         AtomicBoolean spawned = new AtomicBoolean(false);
-        player.getCapability(ModCapabilities.PLAYER_DATA).ifPresent(cap -> spawned.set(cap.isSpawned()));
+        player.getCapability(InvadersCapabilities.PLAYER_DATA).ifPresent(cap -> spawned.set(cap.isSpawned()));
 
         if (!spawned.get()) {
-            player.getCapability(ModCapabilities.PLAYER_DATA).ifPresent(ModPlayerData::spawned);
+            player.getCapability(InvadersCapabilities.PLAYER_DATA).ifPresent(ModPlayerData::spawned);
         }
         if (spawned.get()) return;
 

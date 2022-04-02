@@ -7,7 +7,7 @@ import wintersteve25.invaders.Invaders;
 import wintersteve25.invaders.capabilities.ModPlayerData;
 import wintersteve25.invaders.capabilities.base.CapabilityStorage;
 
-public class ModCapabilities {
+public class InvadersCapabilities {
     @CapabilityInject(ModPlayerData.class)
     public static Capability<ModPlayerData> PLAYER_DATA;
 

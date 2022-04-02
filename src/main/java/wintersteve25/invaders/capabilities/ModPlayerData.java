@@ -36,11 +36,13 @@ public class ModPlayerData implements ICapabilityHolder {
     public CompoundNBT write() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("invaders_player_spawned", spawned);
+        nbt.putInt("invaders_player_reRollCount", reRollCount);
         return nbt;
     }
 
     @Override
     public void read(CompoundNBT nbt) {
         spawned = nbt.getBoolean("invaders_player_spawned");
+        reRollCount = nbt.getInt("invaders_player_reRollCount");
     }
 }

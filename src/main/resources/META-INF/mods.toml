@@ -21,3 +21,9 @@ description='''
     versionRange="[1.16.4,)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.invaders]]
+    modId="fclib"
+    mandatory=true
+    versionRange="[2.3.16,)"
+    ordering="NONE"
+    side="BOTH"
