@@ -2,34 +2,38 @@ buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
         maven { url = 'https://maven.parchmentmc.org' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.parchmentmc:librarian:1.+'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
+
+mixin {
+    add sourceSets.main, "invaders.refmap.json"
+}
 
 version = "${versions}"
 group = "wintersteve25.${modid}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "${modid}"
 
-//java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
-
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-//    mappings channel: 'snapshot', version: '20201028-1.16.3'
-
     mappings channel: 'parchment', version: '2022.03.06-1.16.5'
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         client {
             workingDirectory project.file('run')
+            arg "-mixin.config="+modid+".mixins.json"
 
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
@@ -46,6 +50,7 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
+            arg "-mixin.config="+modid+".mixins.json"
 
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
@@ -62,6 +67,10 @@ minecraft {
 
         data {
             workingDirectory project.file('run')
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
 
@@ -86,16 +95,42 @@ repositories {
     }
     maven { url 'https://modmaven.dev/' }
 
+    maven {
+        url = "https://maven.architectury.dev"
+    }
+
+    maven {
+        url = "https://maven.saps.dev/minecraft"
+    }
+
     mavenLocal()
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.20'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
+
+    // top
     implementation fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22")
+
+    // ct
     implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.2.455")
+
+    // fclib
     implementation fg.deobf("curse.maven:fclib-497404:3567946")
+
+    // jei
     implementation fg.deobf("mezz.jei:jei-${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
+
+    // ftb teams
+    implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
+    implementation fg.deobf("me.shedaniel:architectury-forge:${architectury_version}")
+
+    implementation fg.deobf("dev.ftb.mods:ftb-teams-forge:${ftb_teams_version}")
+    implementation fg.deobf("dev.ftb.mods:ftb-library-forge:${ftb_lib_version}")
+    implementation fg.deobf("dev.ftb.mods:ftb-chunks-forge:${ftb_chunks_version}")
+    
+    annotationProcessor ("org.spongepowered:mixin:0.8.5:processor")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -109,6 +144,7 @@ jar {
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"invaderssareus",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            "MixinConfigs": "${modid}.mixins.json",
         ])
     }
 }

@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "wintersteve25.invaders.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "invaders.refmap.json",
+  "mixins": [
+    "EntitySensesMixin",
+    "MobEntityMixin"
+  ],
+  "server": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

@@ -1,0 +1,11 @@
+{
+  "button_hover": {
+    "category": "master",
+    "sounds": [
+      {
+        "name": "invaders:button_hover",
+        "stream": true
+      }
+    ]
+  }
+}

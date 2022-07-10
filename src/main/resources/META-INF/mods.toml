@@ -27,3 +27,15 @@ description='''
     versionRange="[2.3.16,)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.invaders]]
+    modId="ftbteams"
+    mandatory=true
+    versionRange="[1605.2.3-build.40,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.invaders]]
+    modId="ftbchunks"
+    mandatory=true
+    versionRange="[1605.3.2-build.115,)"
+    ordering="NONE"
+    side="BOTH"

@@ -9,6 +9,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -18,7 +19,9 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.LazyOptional;
 import wintersteve25.invaders.Invaders;
-import wintersteve25.invaders.capabilities.ModPlayerData;
+import wintersteve25.invaders.data.worlddata.InvadersWorldData;
+import wintersteve25.invaders.data.capabilities.ModPlayerData;
+import wintersteve25.invaders.init.InvadersBlocks;
 import wintersteve25.invaders.init.InvadersCapabilities;
 import wintersteve25.invaders.init.InvadersConfigs;
 import wintersteve25.invaders.utils.InvadersConstants;
@@ -54,8 +57,12 @@ public class ReRollSpawnCommand implements Command<CommandSource> {
 
     public static int spawnPlayerAtAppropriateBiome(ServerPlayerEntity player) {
         if (getSpawnBiomes().isEmpty()) return 1;
+        if (player.getCapability(InvadersCapabilities.PLAYER_DATA).map(cap -> cap.getHubPos() != null).orElse(false)) {
+            player.sendMessage(TranslationHelper.getCommandErrorMessage(InvadersConstants.LangKeys.SPAWN_COMMAND_HUB_PLACED), player.getUUID());
+            return 0;
+        }
 
-        int searchRadius = InvadersConfigs.SEARCH_RADIUS_BASE.get();
+        int searchRadius = InvadersConfigs.Common.SEARCH_RADIUS_BASE.get();
 
         LazyOptional<ModPlayerData> playerData = player.getCapability(InvadersCapabilities.PLAYER_DATA);
         if (!playerData.isPresent() || !playerData.resolve().isPresent()) {
@@ -65,53 +72,89 @@ public class ReRollSpawnCommand implements Command<CommandSource> {
 
         ModPlayerData data = playerData.resolve().get();
 
-        if (data.getReRollCount() > 3) {
+        if (data.getReRollCount() > InvadersConfigs.Common.MAX_RE_ROLL_COUNT.get()) {
             player.sendMessage(TranslationHelper.getCommandErrorMessage(InvadersConstants.LangKeys.SPAWN_COMMAND_EXCEED_MAX), player.getUUID());
             return 0;
         }
 
+        player.sendMessage(TranslationHelper.getCommandSuccessMessage(InvadersConstants.LangKeys.SPAWN_COMMAND_SUCCESS), player.getUUID());
         Invaders.LOGGER.info("Attempting to spawn player in an appropriate spawning biome");
+
+        player.inventory.clearContent();
+        player.addItem(new ItemStack(InvadersBlocks.Core.HUB_BLOCK.asItem()));
 
         data.addReRollCount(1);
         ServerWorld world = (ServerWorld) player.getCommandSenderWorld();
+        ResourceLocation current = world.getBiome(player.blockPosition()).getRegistryName();
+
+        InvadersWorldData worldData = InvadersWorldData.get(world);
+
         BlockPos nearestBiome = null;
+        int biomeCount = 0;
 
-        int count = 1;
+        while(nearestBiome == null) {
+            biomeCount++;
 
-        // keep looking for biome until it finds it
-        while (nearestBiome == null) {
-            Invaders.LOGGER.info("Attempting to find appropriate biome, trial #" + count);
+            int searchCount = 1;
+            String randBiome = getSpawnBiomes().get(MiscHelper.randomInRange(0, getSpawnBiomes().size()-1));
+            ResourceLocation location = new ResourceLocation(randBiome);
+            Biome biome = world.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getOptional(location).orElse(null);
 
-            ResourceLocation location = new ResourceLocation(getSpawnBiomes().get(MiscHelper.randomInRange(0, getSpawnBiomes().size()-1)));
-            ResourceLocation current = world.getBiome(player.blockPosition()).getRegistryName();
-
-            if (current == null) continue;
-
-            if (getSpawnBiomes().contains(current.toString())) {
-                nearestBiome = player.blockPosition();
-            } else {
-                Biome biome = world.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getOptional(location).orElse(null);
-                if (biome == null) {
-                    throw new IllegalStateException("Tried to spawn player in a biome that can not be found! This should really not be happening!");
+            // if player haven't somehow already spawned at all biomes before
+            if (data.getSpawnedBiomes().size() < getSpawnBiomes().size()) {
+                // keep setting it to a biome the player haven't been spawned in
+                while (data.hasPlayerSpawnedInBiomeBefore(randBiome)) {
+                    randBiome = getSpawnBiomes().get(MiscHelper.randomInRange(0, getSpawnBiomes().size()-1));
                 }
-                nearestBiome = world.findNearestBiome(biome, player.blockPosition(), searchRadius * count, 8);
             }
 
-            count++;
+            // do the same thing for world data
+            if (!worldData.hasBeenToAllBiomes(getSpawnBiomes().size())) {
+                while (worldData.hasSpawnedBiome(randBiome)) {
+                    randBiome = getSpawnBiomes().get(MiscHelper.randomInRange(0, getSpawnBiomes().size()-1));
+                }
+            }
+
+            // keep looking for biome until it finds it or when it reaches a limit
+            while (nearestBiome == null) {
+                Invaders.LOGGER.info("Attempting to find " + randBiome + " trial #" + searchCount);
+
+                if (current == null) break;
+
+                if (current.toString().equals(randBiome)) {
+                    nearestBiome = player.blockPosition();
+                    break;
+                } else {
+                    if (biome == null) {
+                        throw new IllegalStateException("Tried to spawn player in a biome that can not be found! This should really not be happening!");
+                    }
+                    nearestBiome = world.findNearestBiome(biome, player.blockPosition(), searchRadius * searchCount, 8);
+                }
+
+                searchCount++;
+
+                if (nearestBiome == null) {
+                    Invaders.LOGGER.info("Didn't find " + location + " within " + searchRadius*(searchCount-1) + " blocks, looking within " + searchRadius*searchCount + " blocks");
+                } else {
+                    Invaders.LOGGER.info("Found: " + location);
+                }
+
+                if (searchCount > InvadersConfigs.Common.MAX_SEARCH_TRIAL_COUNT.get()) {
+                    break;
+                }
+            }
 
             if (nearestBiome == null) {
-                Invaders.LOGGER.info("Didn't find " + location.toString() + " within " + searchRadius*(count-1) + " blocks, looking within " + searchRadius*count + " blocks");
-            } else {
-                Invaders.LOGGER.info("Found: " + location.toString());
+                Invaders.LOGGER.warn("Can not find: " + randBiome + " spawn biome, there are " + biomeCount + " biome trials left before giving up");
             }
 
-            if (count > InvadersConfigs.MAX_SEARCH_TRIAL_COUNT.get()) {
+            if (biomeCount > InvadersConfigs.Common.MAX_BIOME_TRIAL_COUNT.get()) {
                 break;
             }
         }
 
         if (nearestBiome == null) {
-            Invaders.LOGGER.warn("Can not find appropriate spawn biome");
+            Invaders.LOGGER.warn("Could not find: appropriate spawn biome");
             return 0;
         }
 
@@ -121,10 +164,18 @@ public class ReRollSpawnCommand implements Command<CommandSource> {
         player.setRespawnPosition(world.dimension(), nearestBiome, 0, true, false);
         player.teleportTo(world, nearestBiome.getX(), nearestBiome.getY(), nearestBiome.getZ(), 0, 0);
 
+        ResourceLocation biome = world.getBiome(nearestBiome).getRegistryName();
+        if (biome != null) {
+            data.addBiomeSpawned(biome);
+            worldData.addSpawnedBiome(biome);
+        }
+
+        InvadersWorldData.refreshClient(player);
+
         return 1;
     }
 
-    public static List<String> getSpawnBiomes() {
-        return MiscHelper.isListValid(InvadersConfigs.SPAWN_BIOMES.get()) ? InvadersConfigs.SPAWN_BIOMES.get() : spawnBiomes;
+    private static List<String> getSpawnBiomes() {
+        return MiscHelper.isListValid(InvadersConfigs.Common.SPAWN_BIOMES.get()) ? InvadersConfigs.Common.SPAWN_BIOMES.get() : spawnBiomes;
     }
 }

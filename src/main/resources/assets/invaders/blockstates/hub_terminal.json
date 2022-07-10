@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "invaders:block/core/hub_terminal"
+    },
+    "facing=south": {
+      "y": 180,
+      "model": "invaders:block/core/hub_terminal"
+    },
+    "facing=west": {
+      "y": 270,
+      "model": "invaders:block/core/hub_terminal"
+    },
+    "facing=east": {
+      "y": 90,
+      "model": "invaders:block/core/hub_terminal"
+    },
+    "facing=up": {
+      "model": "invaders:block/core/hub_terminal"
+    },
+    "facing=down": {
+      "model": "invaders:block/core/hub_terminal"
+    }
+  }
+}

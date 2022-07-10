@@ -1,4 +1,22 @@
 {
+  "block.invaders.hub_terminal": "Hub Terminal",
+  "invaders.bossbars.invasion": "Invasion Waves: %s/%s",
   "invaders.commands.error.spawn.error": "\u00A7cIf you see this message please open a bug report!",
-  "invaders.commands.error.spawn.exceedMax": "\u00A7cMax Re-Roll Count Reached!"
+  "invaders.commands.error.spawn.exceedmax": "\u00A7cMax re-roll count reached!",
+  "invaders.commands.error.spawn.hubplaced": "\u00A7cCan not re-roll once hub is placed!",
+  "invaders.commands.success.dumpforest": "Information printed in log",
+  "invaders.commands.success.spawn.success": "\u00A7aStarting re-roll spawn, this may take a while.",
+  "invaders.gui.hub.btn.list": "Team List",
+  "invaders.gui.hub.health": "Hub Health: %s/%s",
+  "invaders.gui.hub.owner": "Hub Owner: %s",
+  "invaders.gui.titles.hub": "The Hub",
+  "invaders.messages.destroy_hub": "\u00A7cHub can not be broken!",
+  "invaders.messages.failed_to_claim_chunk": "\u00A7cOnly chunks in range of the hub can be claimed!",
+  "invaders.messages.place_hub_warning": "\u00A7cHub can not be broken once placed, and you will not be able to re-roll spawn, shift place to confirm placement",
+  "invaders.title.invasion.success": "Invasion Defended!",
+  "invaders.title.invasion.waveenemycount": "Invaders count: %s",
+  "invaders.title.invasion.wavestarted": "Wave Started!",
+  "invaders.tooltips.items.hub": "The very brain of your island",
+  "invaders.tooltips.shiftInfo": "\u00A78Hold shift for more information",
+  "itemGroup.invaders": "Invaders"
 }
