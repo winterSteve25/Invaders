@@ -46,8 +46,10 @@ import wintersteve25.invaders.contents.base.builders.ONIContainerBuilder;
 import wintersteve25.invaders.contents.base.functional.IGui;
 import wintersteve25.invaders.contents.entities.HubEntity;
 import wintersteve25.invaders.data.worlddata.InvadersWorldData;
+import wintersteve25.invaders.data.worlddata.InvasionWorldData;
 import wintersteve25.invaders.init.InvadersBlocks;
 import wintersteve25.invaders.init.InvadersCapabilities;
+import wintersteve25.invaders.init.InvadersConfigs;
 import wintersteve25.invaders.init.InvadersEntities;
 import wintersteve25.invaders.utils.InvadersConstants;
 import wintersteve25.invaders.utils.helpers.TranslationHelper;
@@ -179,6 +181,14 @@ public class HubBE extends ONIBaseInvTE implements ONIIBoundingBlock {
     
     public void addHealth(float health) {
         this.health += health;
+        
+        if (this.health < 0) {
+            this.health = 0;
+            if (isServer()) {
+                InvasionWorldData.get(level).getInvasion(FTBTeamsAPI.getPlayerTeamID(owner)).failed((ServerWorld) level);
+            }
+        }
+        
         updateBlock();
     }
 
@@ -199,11 +209,15 @@ public class HubBE extends ONIBaseInvTE implements ONIIBoundingBlock {
             worldIn.removeBlock(pos, false);
             return;
         }
+        
+        maxHealth = InvadersConfigs.Common.BASE_HUB_HEALTH.get();
+        health = maxHealth;
 
-        Invaders.LOGGER.debug("Player {} just placed hub at {}", placer.getDisplayName(), pos);
         owner = placer.getUUID();
 
         if (!worldIn.isClientSide()) {
+            Invaders.LOGGER.debug("Player {} just placed hub at {}", placer.getStringUUID(), pos);
+
             Entity e = InvadersEntities.HUB.get().spawn((ServerWorld) worldIn, null, null, getBlockPos(), SpawnReason.STRUCTURE, false, false);
             if (!(e instanceof HubEntity)) {
                 throw new IllegalStateException("Hub Entity Spawned is invalid");
@@ -227,11 +241,6 @@ public class HubBE extends ONIBaseInvTE implements ONIIBoundingBlock {
                     eastOceanChunk = findBiomeInDirection(worldIn, origin, 1, 0);
                     southOceanChunk = findBiomeInDirection(worldIn, origin, 0, 1);
                     InvadersWorldData.refreshClient((ServerPlayerEntity) placer);
-
-                    Invaders.LOGGER.debug(northOceanChunk.toString());
-                    Invaders.LOGGER.debug(westOceanChunk.toString());
-                    Invaders.LOGGER.debug(eastOceanChunk.toString());
-                    Invaders.LOGGER.debug(southOceanChunk.toString());
                 }
             }
         });

@@ -34,6 +34,7 @@ public class InvadersConstants {
         public static final TranslationTextComponent INVASION_WAVE_STARTED = TranslationHelper.titles("invasion.waveStarted");
         public static final String INVASION_WAVE_ENEMY_COUNT = "invasion.waveEnemyCount";
         public static final TranslationTextComponent INVASION_SUCCESS = TranslationHelper.titles("invasion.success");
+        public static final TranslationTextComponent INVASION_FAILED = TranslationHelper.titles("invasion.failed");
         public static final String INVASION = "invasion";
     }
 

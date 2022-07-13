@@ -28,6 +28,8 @@ import wintersteve25.invaders.commands.InvadersCommands;
 import wintersteve25.invaders.commands.ReRollSpawnCommand;
 import wintersteve25.invaders.data.worlddata.InvadersWorldData;
 import wintersteve25.invaders.init.InvadersCapabilities;
+import wintersteve25.invaders.settings.HubHealthMilestoneSetting;
+import wintersteve25.invaders.settings.InvadersSettings;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -35,15 +37,16 @@ public class ServerForgeEvents {
 
     public static void registerJson(JsonConfigEvent.Registration event) {
         Invaders.INVASION_SETTINGS = new JsonConfigBuilder<>(SimpleObjectMap.class, new ResourceLocation(Invaders.MODID, "invasion_settings"))
-                .addConfigObjectToList("enemy_milestones", new SimpleConfigObject(new EnemyMilestoneSetting("level_1_enemies", 1, Lists.newArrayList(new WaveBasedEnemy("creepers", new SimpleEntityProvider("minecraft:creeper", false), 2, 1)))), false)
-                .addConfigObjectToList("loot_milestones", new SimpleConfigObject(new LootMilestoneSetting("level_1_loot", 1, Lists.newArrayList(new LootDrop("iron", new SimpleItemProvider("minecraft:iron_ingot", 1, "", false), 0.4f, 1, 4)))), false)
-                .addConfigObjectToList("wave_milestones", new SimpleConfigObject(new WavesMilestoneSetting("diff_1", 1, 3, 10, 18)), false)
+                .addConfigObjectToList("enemy_milestones", new SimpleConfigObject(new EnemyMilestoneSetting("level_1_enemies", 1, Lists.newArrayList(new WaveBasedEnemy("creepers", new SimpleEntityProvider("minecraft:creeper", false), 2, 1)))), true)
+                .addConfigObjectToList("loot_milestones", new SimpleConfigObject(new LootMilestoneSetting("level_1_loot", 1, Lists.newArrayList(new LootDrop("iron", new SimpleItemProvider("minecraft:iron_ingot", 1, "", false), 0.4f, 1, 4)))), true)
+                .addConfigObjectToList("wave_milestones", new SimpleConfigObject(new WavesMilestoneSetting("diff_1", 1, 3, 10, 18)), true)
+                .addConfigObjectToList("hub_health_milestones", new SimpleConfigObject(new HubHealthMilestoneSetting("diff_1", 1, 1)), true)
                 .build();
     }
 
     public static void readJson(JsonConfigEvent.Post event) {
         IJsonConfig config = event.getConfig();
-        if (config.UID().equals(new ResourceLocation(Invaders.MODID, "invasion_settings"))) {
+        if (config.UID().equals(Invaders.INVASION_SETTINGS.UID())) {
             SimpleObjectMap obj = config.finishedConfig();
             if (obj == null) return;
             for (SimpleConfigObject configObject : obj.getConfigs().get("enemy_milestones")) {
@@ -59,6 +62,11 @@ public class ServerForgeEvents {
             for (SimpleConfigObject configObject : obj.getConfigs().get("wave_milestones")) {
                 WavesMilestoneSetting setting = (WavesMilestoneSetting) configObject.getTarget();
                 InvasionSettings.JsonSettings.wavesMilestones.put(setting.getDifficulty(), setting);
+            }
+
+            for (SimpleConfigObject configObject : obj.getConfigs().get("hub_health_milestones")) {
+                HubHealthMilestoneSetting setting = (HubHealthMilestoneSetting) configObject.getTarget();
+                InvadersSettings.JsonSettings.hubHealthMilestone.put(setting.getDifficulty(), setting.getMaxHealthScaleFactor());
             }
         }
     }

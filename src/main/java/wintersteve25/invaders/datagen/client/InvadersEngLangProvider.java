@@ -45,6 +45,7 @@ public class InvadersEngLangProvider extends LanguageProvider {
         add(InvadersConstants.LangKeys.INVASION_WAVE_STARTED.getKey(), "Wave Started!");
         add(TranslationHelper.titles(InvadersConstants.LangKeys.INVASION_WAVE_ENEMY_COUNT).getKey(), "Invaders count: %s");
         add(InvadersConstants.LangKeys.INVASION_SUCCESS.getKey(), "Invasion Defended!");
+        add(InvadersConstants.LangKeys.INVASION_FAILED.getKey(), TextFormatting.RED + "Invasion Failed!");
         
         add("itemGroup.invaders", "Invaders");
     }

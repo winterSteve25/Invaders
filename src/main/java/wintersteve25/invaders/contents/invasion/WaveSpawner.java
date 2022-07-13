@@ -95,14 +95,19 @@ public class WaveSpawner {
         bossBar = new ServerBossInfo(TranslationHelper.bossBar("invasion.starting"), BossInfo.Color.RED, BossInfo.Overlay.PROGRESS);
     }
 
+    // TODO: why is the first wave no longer spawning things?
     public int spawnWave(ServerWorld world) {
         waveOn++;
         
         WavesMilestoneSetting wave = settings.getWaveCount(teamDifficulty);
         int expectedEnemySpawnCount = MiscHelper.randomInRange(wave.getMinEnemyCount(), wave.getMaxEnemyCount());
         List<WaveBasedEnemy> waveBasedEnemies = settings.getEnemies(waveOn, teamDifficulty);
+        
+        if (waveBasedEnemies.isEmpty()) {
+            Invaders.LOGGER.warn("No enemies spawned on wave " + waveOn + " on difficulty " + teamDifficulty);
+        }
+        
         int enemySpawnCount = 0;
-
         enemies.clear();
 
         for (WaveBasedEnemy waveEnemy : waveBasedEnemies) {

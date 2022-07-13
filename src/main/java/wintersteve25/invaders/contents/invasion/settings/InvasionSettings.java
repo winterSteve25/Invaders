@@ -1,13 +1,13 @@
 package wintersteve25.invaders.contents.invasion.settings;
 
-import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
+import wintersteve25.invaders.settings.Settings;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class InvasionSettings {
+public class InvasionSettings extends Settings {
     public static InvasionSettings JsonSettings;
 
     static {
@@ -42,35 +42,5 @@ public class InvasionSettings {
     
     public WavesMilestoneSetting getWaveCount(int difficulty) {
         return getValue(wavesMilestones, difficulty);
-    }
-    
-    @Nullable
-    private <T> T getValue(Map<Integer, T> map, int milestone) {
-        if (map.isEmpty()) return null;
-        
-        if (map.containsKey(milestone)) {
-            return map.get(milestone);
-        }
-        
-        int mapSize = map.size();
-        List<T> values = new ArrayList<>(map.values());
-        
-        if (mapSize == 1) {
-            return values.get(0);
-        }
-        
-        List<Integer> keys = new ArrayList<>(map.keySet());
-        
-        for (int i = 0; i < mapSize; i++) {
-            if (i == mapSize - 1) {
-                return values.get(0);
-            }
-
-            if (milestone >= keys.get(i) && milestone < keys.get(i + 1)) {
-                return values.get(i);
-            }
-        }
-        
-        return values.get(0);
     }
 }

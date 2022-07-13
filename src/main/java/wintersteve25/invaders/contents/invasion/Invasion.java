@@ -65,7 +65,7 @@ public class Invasion {
         }
         started = true;
     }
-    
+
     public void tick(ServerWorld world) {
         if (!started) return;
         
@@ -126,6 +126,22 @@ public class Invasion {
             player.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
         }
         
+        waveSpawner.getBossBar().removeAllPlayers();
+        started = false;
+        InvasionWorldData.get(world).removeInvasion(targetedTeam);
+    }
+
+    public void failed(ServerWorld world) {
+        for (Entity entity : waveSpawner.getEnemies()) {
+            entity.remove();
+        }
+
+        List<ServerPlayerEntity> players = new ArrayList<>(waveSpawner.getBossBar().getPlayers());
+        for (ServerPlayerEntity player : players) {
+            player.connection.send(new STitlePacket(STitlePacket.Type.TITLE, InvadersConstants.LangKeys.INVASION_FAILED));
+            player.playSound(SoundEvents.ENDER_DRAGON_GROWL, 1, 1);
+        }
+
         waveSpawner.getBossBar().removeAllPlayers();
         started = false;
         InvasionWorldData.get(world).removeInvasion(targetedTeam);

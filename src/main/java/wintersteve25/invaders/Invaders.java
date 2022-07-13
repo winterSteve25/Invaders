@@ -4,7 +4,6 @@ import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,7 +18,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wintersteve25.invaders.contents.entities.HubEntity;
-import wintersteve25.invaders.contents.invasion.InvasionEventHandler;
 import wintersteve25.invaders.contents.invasion.settings.*;
 import wintersteve25.invaders.datagen.client.InvadersEngLangProvider;
 import wintersteve25.invaders.datagen.client.InvadersModelProvider;
@@ -29,6 +27,7 @@ import wintersteve25.invaders.events.ArchitecturyEvents;
 import wintersteve25.invaders.events.ServerForgeEvents;
 import wintersteve25.invaders.init.*;
 import wintersteve25.invaders.network.InvadersNetworking;
+import wintersteve25.invaders.settings.HubHealthMilestoneSetting;
 
 @Mod(Invaders.MODID)
 public class Invaders {
@@ -49,6 +48,8 @@ public class Invaders {
     public static ObjProviderType LOOT;
     public static ObjProviderType WAVE_MILESTONE;
     
+    public static ObjProviderType HUB_HEALTH_MILESTONE;
+    
     public Invaders() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, InvadersConfigs.COMMON_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, InvadersConfigs.CLIENT_CONFIG);
@@ -67,6 +68,8 @@ public class Invaders {
         LOOT = new ObjProviderType("Loot", null, null, null, LootDrop.class);
         WAVE_MILESTONE = new ObjProviderType("WaveMilestone", null, null, null, WavesMilestoneSetting.class);
         
+        HUB_HEALTH_MILESTONE = new ObjProviderType("HubHealthMilestone", null, null, null, HubHealthMilestoneSetting.class);
+
         final IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
         InvadersCapabilities.register();
         InvadersNetworking.registerMessages();

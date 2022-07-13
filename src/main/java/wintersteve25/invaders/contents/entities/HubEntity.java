@@ -66,15 +66,13 @@ public class HubEntity extends LivingEntity {
 
     @Override
     public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
-        boolean res = super.hurt(p_70097_1_, p_70097_2_);
-        
-        if (level.isClientSide()) return res;
+        super.hurt(p_70097_1_, p_70097_2_);
+        if (level.isClientSide()) return false;
         TileEntity te = level.getBlockEntity(blockEntity);
-        if (!(te instanceof HubBE)) return res;
+        if (!(te instanceof HubBE)) return false;
         HubBE hub = (HubBE) te;
         hub.addHealth(-p_70097_2_);
-        
-        return res;
+        return false;
     }
 
     @Override
